@@ -1,5 +1,6 @@
 package com.ultra.ecommerce.dtos;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -13,4 +14,6 @@ public class RegisterUserDto {
     private String password;
     @NotBlank(message = "Please provide a full name")
     private String fullName;
+    @JsonProperty(value = "isUserAdmin")
+    private boolean isUserAdmin;
 }
