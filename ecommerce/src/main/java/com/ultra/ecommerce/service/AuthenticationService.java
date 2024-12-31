@@ -38,6 +38,9 @@ public class AuthenticationService {
     }
 
     public User signup(RegisterUserDto input) {
+        userRepository.findByEmail(input.getEmail()).ifPresent(user -> {
+            throw new IllegalArgumentException("User with email already exists");
+        });
         String role = input.isUserAdmin() ? "ROLE_ADMIN" : "ROLE_USER";
         Role userRole = roleRepository.findByAuthority(role).orElseThrow(() -> new NoSuchElementException("Authority not present"));
         Set<Role> authorities = new HashSet<>();

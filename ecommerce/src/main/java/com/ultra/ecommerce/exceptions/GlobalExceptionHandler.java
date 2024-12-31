@@ -2,8 +2,8 @@ package com.ultra.ecommerce.exceptions;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -12,45 +12,72 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(Exception.class)
-    public ProblemDetail handleSecurityException(Exception exception) {
-        ProblemDetail errorDetail = null;
 
-        // TODO send this stack trace to an observability tool
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleSecurityException(Exception exception) {
+        // TODO: Send this stack trace to an observability tool
         exception.printStackTrace();
 
+        ErrorResponse errorResponse;
+        HttpStatus status;
+
         if (exception instanceof BadCredentialsException) {
-            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(401), exception.getMessage());
-            errorDetail.setProperty("description", "The username or password is incorrect");
-
-            return errorDetail;
+            status = HttpStatus.UNAUTHORIZED;
+            errorResponse = new ErrorResponse(status.value(), exception.getMessage(), "The username or password is incorrect");
+        } else if (exception instanceof AccountStatusException) {
+            status = HttpStatus.FORBIDDEN;
+            errorResponse = new ErrorResponse(status.value(), exception.getMessage(), "The account is locked");
+        } else if (exception instanceof AccessDeniedException) {
+            status = HttpStatus.FORBIDDEN;
+            errorResponse = new ErrorResponse(status.value(), exception.getMessage(), "You are not authorized to access this resource");
+        } else if (exception instanceof SignatureException) {
+            status = HttpStatus.FORBIDDEN;
+            errorResponse = new ErrorResponse(status.value(), exception.getMessage(), "The JWT signature is invalid");
+        } else if (exception instanceof ExpiredJwtException) {
+            status = HttpStatus.FORBIDDEN;
+            errorResponse = new ErrorResponse(status.value(), exception.getMessage(), "The JWT token has expired");
+        } else {
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+            errorResponse = new ErrorResponse(status.value(), exception.getMessage(), "Unknown internal server error.");
         }
 
-        if (exception instanceof AccountStatusException) {
-            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(403), exception.getMessage());
-            errorDetail.setProperty("description", "The account is locked");
+        return new ResponseEntity<>(errorResponse, status);
+    }
+
+    // Inner class for error response
+    public static class ErrorResponse {
+        private int statusCode;
+        private String message;
+        private String description;
+
+        public ErrorResponse(int statusCode, String message, String description) {
+            this.statusCode = statusCode;
+            this.message = message;
+            this.description = description;
         }
 
-        if (exception instanceof AccessDeniedException) {
-            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(403), exception.getMessage());
-            errorDetail.setProperty("description", "You are not authorized to access this resource");
+        public int getStatusCode() {
+            return statusCode;
         }
 
-        if (exception instanceof SignatureException) {
-            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(403), exception.getMessage());
-            errorDetail.setProperty("description", "The JWT signature is invalid");
+        public void setStatusCode(int statusCode) {
+            this.statusCode = statusCode;
         }
 
-        if (exception instanceof ExpiredJwtException) {
-            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(403), exception.getMessage());
-            errorDetail.setProperty("description", "The JWT token has expired");
+        public String getMessage() {
+            return message;
         }
 
-        if (errorDetail == null) {
-            errorDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(500), exception.getMessage());
-            errorDetail.setProperty("description", "Unknown internal server error.");
+        public void setMessage(String message) {
+            this.message = message;
         }
 
-        return errorDetail;
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
     }
 }
