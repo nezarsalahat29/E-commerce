@@ -1,0 +1,60 @@
+name: Docker CI/CD for E-Commerce Application
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-push-docker:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+
+    env:
+      DOCKER_IMAGE_NAME: ecommerce-service
+      DOCKER_REGISTRY: docker.io # Replace with your container registry if not Docker Hub
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Log in to Docker Hub
+      run: echo $DOCKER_PASSWORD | docker login $DOCKER_REGISTRY -u $DOCKER_USERNAME --password-stdin
+
+    - name: Build and Tag Docker Image
+      run: |
+        docker build -t $DOCKER_IMAGE_NAME:latest .
+        docker tag $DOCKER_IMAGE_NAME:latest $DOCKER_REGISTRY/$DOCKER_USERNAME/$DOCKER_IMAGE_NAME:latest
+
+    - name: Push Docker Image
+      run: docker push $DOCKER_REGISTRY/$DOCKER_USERNAME/$DOCKER_IMAGE_NAME:latest
+
+  deploy:
+    name: Deploy Docker Container
+    runs-on: ubuntu-latest
+    needs: build-and-push-docker
+
+    steps:
+    - name: Log in to Docker Hub
+      run: echo $DOCKER_PASSWORD | docker login $DOCKER_REGISTRY -u $DOCKER_USERNAME --password-stdin
+
+    - name: Pull and Run Container
+      run: |
+        docker network create ecommerceNet || true
+        docker stop ecommerce-service || true
+        docker rm ecommerce-service || true
+        docker pull $DOCKER_REGISTRY/$DOCKER_USERNAME/$DOCKER_IMAGE_NAME:latest
+        docker run -d --name ecommerce-service \
+          -p 8080:8080 \
+          -v /path/to/local/resources:/app/config \
+          --env-file /path/to/env-docker.properties \
+          --network ecommerceNet \
+          $DOCKER_REGISTRY/$DOCKER_USERNAME/$DOCKER_IMAGE_NAME:latest
