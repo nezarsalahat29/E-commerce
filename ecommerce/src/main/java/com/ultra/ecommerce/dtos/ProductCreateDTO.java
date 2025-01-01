@@ -21,4 +21,8 @@ public class ProductCreateDTO  {
 
     @NotBlank
     private Integer quantity;
+
+    @NotBlank
+    private Long categoryId;
+
 }
