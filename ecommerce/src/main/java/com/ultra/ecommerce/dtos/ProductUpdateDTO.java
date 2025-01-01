@@ -16,4 +16,5 @@ public class ProductUpdateDTO {
 
     private String description;
     private Integer quantity;
+    private Long categoryId;
 }
