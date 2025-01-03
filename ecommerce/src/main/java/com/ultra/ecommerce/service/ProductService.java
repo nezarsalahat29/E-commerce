@@ -5,10 +5,8 @@ import com.ultra.ecommerce.dtos.ProductCreateDTO;
 import com.ultra.ecommerce.dtos.ProductUpdateDTO;
 import com.ultra.ecommerce.entity.Category;
 import com.ultra.ecommerce.entity.Product;
-import com.ultra.ecommerce.entity.User;
 import com.ultra.ecommerce.repository.CategoryRepository;
 import com.ultra.ecommerce.repository.ProductRepository;
-import com.ultra.ecommerce.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -33,7 +31,7 @@ public class ProductService {
         product.setCategory(category);
         return productRepository.save(product);
     }
-    public Product getProductById(Integer id) {
+    public Product getProductById(Long id) {
         return productRepository.findById(id).orElse(null);
     }
     public Product updateProduct(ProductUpdateDTO productUpdateDTO) {
@@ -45,7 +43,7 @@ public class ProductService {
         }
         return productRepository.save(product);
     }
-    public void deleteProduct(Integer id) {
+    public void deleteProduct(Long id) {
         productRepository.deleteById(id);
     }
     public List<Product> getAllProducts() {
@@ -53,4 +51,6 @@ public class ProductService {
         productRepository.findAll().forEach(products::add);
         return products;
     }
+
+
 }
