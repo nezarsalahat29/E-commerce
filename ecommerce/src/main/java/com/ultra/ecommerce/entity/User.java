@@ -1,5 +1,6 @@
 package com.ultra.ecommerce.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.persistence.Id;
@@ -9,7 +10,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @Table(name = "users")
@@ -19,7 +22,7 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
-    private Integer id;
+    private Long id;
 
     @Column(nullable = false)
     private String fullName;
@@ -46,6 +49,10 @@ public class User implements UserDetails {
             inverseJoinColumns = {@JoinColumn(name = "role_id")}
     )
     private Set<Role> authorities;
+
+    @OneToMany(mappedBy = "user")
+    @JsonIgnore
+    private List<Order> orders = new ArrayList<>();
 
     @Override
     public String getPassword() {
@@ -77,5 +84,4 @@ public class User implements UserDetails {
         return true;
     }
 
-    // Getters and setters
 }
