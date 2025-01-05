@@ -1,5 +1,7 @@
 package com.ultra.ecommerce.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.ultra.ecommerce.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +15,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
-
 public class ApplicationConfiguration {
 
     @Autowired
@@ -44,4 +45,5 @@ public class ApplicationConfiguration {
 
         return authProvider;
     }
+
 }
