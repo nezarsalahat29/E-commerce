@@ -39,10 +39,10 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProductById(id));
     }
 
-    @PutMapping
+    @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Product> updateProduct(@RequestBody ProductUpdateDTO productUpdateDTO) {
-        return ResponseEntity.ok(productService.updateProduct(productUpdateDTO));
+    public ResponseEntity<Product> updateProduct( @PathVariable Long id,@RequestBody ProductUpdateDTO productUpdateDTO) {
+        return ResponseEntity.ok(productService.updateProduct(id,productUpdateDTO));
     }
 
     @DeleteMapping("/{id}")

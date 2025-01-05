@@ -7,6 +7,10 @@ import com.ultra.ecommerce.entity.Category;
 import com.ultra.ecommerce.entity.Product;
 import com.ultra.ecommerce.repository.CategoryRepository;
 import com.ultra.ecommerce.repository.ProductRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -31,21 +35,51 @@ public class ProductService {
         product.setCategory(category);
         return productRepository.save(product);
     }
+
+    @Cacheable(value = "products", key = "#id")
     public Product getProductById(Long id) {
         return productRepository.findById(id).orElse(null);
     }
-    public Product updateProduct(ProductUpdateDTO productUpdateDTO) {
-        Product product = objectMapper.convertValue(productUpdateDTO, Product.class);
+
+    @Transactional
+    @CachePut(value = "products", key = "#id")
+    public Product updateProduct(Long id, ProductUpdateDTO productUpdateDTO) {
+        // Fetch the product
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        // Update fields if they are provided in DTO
         if (productUpdateDTO.getCategoryId() != null) {
-            Category category = categoryRepository.findById(productUpdateDTO.getCategoryId())
+            updateCategory(product, productUpdateDTO.getCategoryId());
+        }
+        if (productUpdateDTO.getName() != null) {
+            product.setName(productUpdateDTO.getName());
+        }
+        if (productUpdateDTO.getPrice() != null) {
+            product.setPrice(productUpdateDTO.getPrice());
+        }
+        if (productUpdateDTO.getDescription() != null) {
+            product.setDescription(productUpdateDTO.getDescription());
+        }
+
+        // Save and return updated product
+        return productRepository.save(product);
+    }
+
+    private void updateCategory(Product product, Long categoryId) {
+        if (!categoryId.equals(product.getCategory().getId())) {
+            Category category = categoryRepository.findById(categoryId)
                     .orElseThrow(() -> new RuntimeException("Category not found"));
             product.setCategory(category);
         }
-        return productRepository.save(product);
     }
+
+    @CacheEvict(value = "products", key = "#id")
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);
     }
+
+    @Cacheable(value = "products")
     public List<Product> getAllProducts() {
         List<Product> products = new ArrayList<>();
         productRepository.findAll().forEach(products::add);
