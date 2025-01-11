@@ -8,7 +8,7 @@ import lombok.Data;
 
 @Data
 public class ProductCreateDTO  {
-    @NotNull(message = "Name is required")
+    @NotBlank(message = "Name is required")
     @Size(min = 3, max = 255, message = "Name must be between 3 and 255 characters")
     private String name;
 
@@ -19,10 +19,10 @@ public class ProductCreateDTO  {
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than zero")
     private Double price;
 
-    @NotBlank
+    @NotNull
     private Integer quantity;
 
-    @NotBlank
+    @NotNull
     private Long categoryId;
 
 }
