@@ -6,6 +6,7 @@ import com.ultra.ecommerce.entity.Product;
 import com.ultra.ecommerce.entity.User;
 import com.ultra.ecommerce.service.ProductService;
 import com.ultra.ecommerce.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -25,7 +26,7 @@ public class ProductController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Product> addProduct(@RequestBody ProductCreateDTO productCreateDTO) {
+    public ResponseEntity<Product> addProduct(@RequestBody @Valid ProductCreateDTO productCreateDTO) {
         return ResponseEntity.status(201).body(productService.addProduct(productCreateDTO));
     }
 
@@ -41,7 +42,7 @@ public class ProductController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Product> updateProduct( @PathVariable Long id,@RequestBody ProductUpdateDTO productUpdateDTO) {
+    public ResponseEntity<Product> updateProduct( @PathVariable Long id,@RequestBody @Valid ProductUpdateDTO productUpdateDTO) {
         return ResponseEntity.ok(productService.updateProduct(id,productUpdateDTO));
     }
 

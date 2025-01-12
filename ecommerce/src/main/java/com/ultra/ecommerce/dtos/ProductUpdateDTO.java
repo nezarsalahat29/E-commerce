@@ -9,6 +9,7 @@ import lombok.Data;
 @Data
 public class ProductUpdateDTO {
     @Size(min = 3, max = 255, message = "Name must be between 3 and 255 characters")
+    @NotBlank(message = "Name is required")
     private String name;
 
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than zero")
