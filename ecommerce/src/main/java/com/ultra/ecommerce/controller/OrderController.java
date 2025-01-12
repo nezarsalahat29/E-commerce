@@ -3,6 +3,7 @@ package com.ultra.ecommerce.controller;
 import com.ultra.ecommerce.dtos.CreateOrderRequest;
 import com.ultra.ecommerce.entity.Order;
 import com.ultra.ecommerce.service.OrderService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<Order> createOrder(@RequestBody CreateOrderRequest createOrderRequest) {
+    public ResponseEntity<Order> createOrder(@RequestBody @Valid CreateOrderRequest createOrderRequest) {
         Order order = orderService.createOrder(createOrderRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }
