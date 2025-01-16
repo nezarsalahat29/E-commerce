@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  ecommerce-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - D:\Projects\E-commerce\ecommerce\src\main\resources:/app/config
+    environment:
+      - JWT_KEY=secret
+      - DB_HOST=ecommerceDB
+      - DB_PORT=5432
+      - DB_DATABASE=ecommerce
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - ecommerceDB
+      - redis
+
+  ecommerceDB:
+    image: postgres
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: ecommerce
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  pgdata:

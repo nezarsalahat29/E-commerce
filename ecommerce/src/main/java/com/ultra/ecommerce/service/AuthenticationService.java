@@ -3,6 +3,7 @@ package com.ultra.ecommerce.service;
 import com.ultra.ecommerce.dtos.RegisterUserDto;
 import com.ultra.ecommerce.entity.Role;
 import com.ultra.ecommerce.entity.User;
+import com.ultra.ecommerce.enums.Roles;
 import com.ultra.ecommerce.repository.RoleRepository;
 import com.ultra.ecommerce.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -41,8 +42,10 @@ public class AuthenticationService {
         userRepository.findByEmail(input.getEmail()).ifPresent(user -> {
             throw new IllegalArgumentException("User with email already exists");
         });
-        String role = input.isUserAdmin() ? "ROLE_ADMIN" : "ROLE_USER";
-        Role userRole = roleRepository.findByAuthority(role).orElseThrow(() -> new NoSuchElementException("Authority not present"));
+        String role = input.isUserAdmin() ? Roles.ROLE_ADMIN.getRole() : Roles.ROLE_USER.getRole();
+        Role userRole = roleRepository.findByAuthority(role).orElseGet(
+                () -> roleRepository.save(new Role(role))
+        );
         Set<Role> authorities = new HashSet<>();
         authorities.add(userRole);
         User user = new User();
